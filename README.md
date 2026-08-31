@@ -10,7 +10,7 @@
 
 ---
 
-## 🌟 Why this is a Standout Portfolio Project
+##  Why this is a Standout Portfolio Project
 
 Most AI coding projects are simple chatbot wrappers (*"paste code $\rightarrow$ AI gives advice"*). **AI Git Reviewer** is built as an actual production-grade developer tool integrated into the GitHub developer lifecycle:
 
