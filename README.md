@@ -1,4 +1,4 @@
-# 🚀 AI Git Reviewer
+# AI Git Reviewer
 
 > **An automated GitHub App & Code Intelligence platform that inspects Pull Requests, performs deterministic static security scans, runs structured multi-category AI code reviews, and posts native inline comments with 1-click apply fixes.**
 
