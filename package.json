@@ -1,0 +1,29 @@
+{
+  "name": "ai-git-reviewer-monorepo",
+  "version": "1.0.0",
+  "private": true,
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "dev:server": "npm --workspace=@ai-reviewer/server run dev",
+    "dev:client": "npm --workspace=@ai-reviewer/client run dev",
+    "dev": "npm run dev:server",
+    "build:shared": "npm --workspace=@ai-reviewer/shared run build",
+    "build:server": "npm --workspace=@ai-reviewer/server run build",
+    "build:client": "npm --workspace=@ai-reviewer/client run build",
+    "build": "npm run build:shared && npm run build:server && npm run build:client",
+    "test": "npm --workspace=@ai-reviewer/server run test"
+  },
+  "keywords": [
+    "github-app",
+    "ai-code-review",
+    "pull-request",
+    "static-analysis",
+    "gemini",
+    "openai"
+  ],
+  "author": "AI Git Reviewer",
+  "license": "MIT"
+}
+
