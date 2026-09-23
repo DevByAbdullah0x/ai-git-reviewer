@@ -1,16 +1,31 @@
 # AI Git Reviewer
+<div align="center">
+  <img src="assets/logo.png" alt="AI Git Reviewer Logo" width="460" />
 
 > **An automated GitHub App & Code Intelligence platform that inspects Pull Requests, performs deterministic static security scans, runs structured multi-category AI code reviews, and posts native inline comments with 1-click apply fixes.**
+  <h1>AI Git Reviewer</h1>
+  <p><strong>automated code review, powered by AI</strong></p>
 
 ![Architecture](https://img.shields.io/badge/Architecture-GitHub%20App%20%2B%20Microservices-blue)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.5-3178c6)
 ![React](https://img.shields.io/badge/Frontend-React%20%2B%20Vite%20%2B%20Tailwind-61dafb)
 ![Node.js](https://img.shields.io/badge/Backend-Node.js%20%2B%20Express-339933)
 ![License](https://img.shields.io/badge/License-MIT-green)
+  [![Live Demo](https://img.shields.io/badge/Vercel-Live%20Demo-black?style=for-the-badge&logo=vercel)](https://ai-git-reviewer.vercel.app)
+  [![GitHub](https://img.shields.io/badge/GitHub-Repository-181717?style=for-the-badge&logo=github)](https://github.com/DevByAbdullah0x/ai-git-reviewer)
+  ![TypeScript](https://img.shields.io/badge/TypeScript-5.5-3178c6)
+  ![React](https://img.shields.io/badge/Frontend-React%20%2B%20Vite%20%2B%20Tailwind-61dafb)
+  ![Node.js](https://img.shields.io/badge/Backend-Node.js%20%2B%20Express-339933)
+  ![License](https://img.shields.io/badge/License-MIT-green)
+
+  <br />
+  <p><em>An automated GitHub App & Code Intelligence platform that inspects Pull Requests, performs deterministic static security scans, runs structured multi-category AI code reviews, and posts native inline comments with 1-click apply fixes.</em></p>
+</div>
 
 ---
 
 ##  Why this is a Standout Portfolio Project
+## 🚀 Why this is a Standout Portfolio Project
 
 Most AI coding projects are simple chatbot wrappers (*"paste code $\rightarrow$ AI gives advice"*). **AI Git Reviewer** is built as an actual production-grade developer tool integrated into the GitHub developer lifecycle:
 
