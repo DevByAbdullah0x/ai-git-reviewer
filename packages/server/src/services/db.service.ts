@@ -8,7 +8,9 @@ interface DatabaseSchema {
   metrics: MetricsSummary;
 }
 
-const DATA_FILE = path.resolve(__dirname, '../../data/store.json');
+const DATA_FILE = process.env.VERCEL
+  ? '/tmp/store.json'
+  : path.resolve(__dirname, '../../data/store.json');
 
 class DatabaseService {
   private data: DatabaseSchema;
@@ -22,7 +24,10 @@ class DatabaseService {
     try {
       if (fs.existsSync(DATA_FILE)) {
         const raw = fs.readFileSync(DATA_FILE, 'utf-8');
-        return JSON.parse(raw);
+        const parsed = JSON.parse(raw);
+        if (parsed.repositories && parsed.repositories.length > 0) {
+          return parsed;
+        }
       }
     } catch (err) {
       console.warn('[DB] Failed to read store.json, using in-memory store:', err);
@@ -30,7 +35,24 @@ class DatabaseService {
 
     return {
       reviews: [],
-      repositories: [],
+      repositories: [
+        {
+          id: 'repo-devbyabdullah0x-actionrecognition',
+          fullName: 'DevByAbdullah0x/ActionRecognition',
+          owner: 'DevByAbdullah0x',
+          name: 'ActionRecognition',
+          enabled: true,
+          minimumSeverityToBlock: 'HIGH',
+          strictness: 'STANDARD',
+          enabledCategories: ['SECURITY', 'BUG', 'PERFORMANCE', 'CODE_QUALITY', 'BEST_PRACTICES'],
+          customInstructions: '',
+          autoApplySafeFixes: false,
+          postInlineComments: true,
+          postSummaryComment: true,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        },
+      ],
       metrics: {
         totalReviews: 0,
         totalIssuesDetected: 0,

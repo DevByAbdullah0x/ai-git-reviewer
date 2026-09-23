@@ -6,7 +6,7 @@ export default defineConfig({
   plugins: [react()],
   resolve: {
     alias: {
-      '@ai-reviewer/shared': path.resolve(__dirname, '../shared/dist/index.js'),
+      '@ai-reviewer/shared': path.resolve(__dirname, '../shared/src/index.ts'),
     },
   },
   server: {
@@ -19,4 +19,3 @@ export default defineConfig({
     },
   },
 });
-

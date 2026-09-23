@@ -35,6 +35,16 @@ app.listen(config.port, () => {
   console.info(`📊 Dashboard API: http://localhost:${config.port}/api/metrics`);
   console.info('====================================================');
 });
+if (!process.env.VERCEL) {
+  app.listen(config.port, () => {
+    console.info('====================================================');
+    console.info(`🚀 AI Git Reviewer Server running on http://localhost:${config.port}`);
+    console.info(`🤖 AI Provider: [${config.aiProvider.toUpperCase()}]`);
+    console.info(`📦 GitHub Webhook: http://localhost:${config.port}/api/webhooks/github`);
+    console.info(`📊 Dashboard API: http://localhost:${config.port}/api/metrics`);
+    console.info('====================================================');
+  });
+}
 
 export default app;
 

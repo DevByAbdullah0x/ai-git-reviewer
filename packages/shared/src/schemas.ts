@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { ISSUE_CATEGORIES, ISSUE_SEVERITIES } from './constants.js';
+import { ISSUE_CATEGORIES, ISSUE_SEVERITIES } from './constants';
 
 export const IssueSeveritySchema = z.enum(ISSUE_SEVERITIES);
 export const IssueCategorySchema = z.enum(ISSUE_CATEGORIES);
