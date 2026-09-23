@@ -107,7 +107,11 @@ apiRouter.put('/repositories/:id', async (req: Request, res: Response): Promise<
     return;
   }
 
-  const existingRepo = db.getRepository(req.params.id);
+  let existingRepo = db.getRepository(req.params.id);
+  if (!existingRepo) {
+    await db.ensureLoaded(true);
+    existingRepo = db.getRepository(req.params.id);
+  }
   const fullName = existingRepo?.fullName || req.body.fullName || req.params.id;
 
   const updated = await db.upsertRepository({

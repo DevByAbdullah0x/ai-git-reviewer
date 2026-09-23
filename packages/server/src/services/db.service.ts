@@ -18,6 +18,7 @@ class DatabaseService {
   private readonly supabase: SupabaseClient | null = null;
   private data: DatabaseSchema;
   private loadPromise: Promise<void> | null = null;
+  private lastLoadedAt: number = 0;
 
   constructor() {
     if (config.supabase.url && config.supabase.serviceRoleKey) {
@@ -66,8 +67,12 @@ class DatabaseService {
     return this.supabase !== null;
   }
 
-  public async ensureLoaded(): Promise<void> {
-    if (this.loadPromise) return this.loadPromise;
+  public async ensureLoaded(force: boolean = false): Promise<void> {
+    if (!force && this.lastLoadedAt > 0 && Date.now() - this.lastLoadedAt < 3000) {
+      return;
+    }
+
+    if (this.loadPromise && !force) return this.loadPromise;
 
     this.loadPromise = (async () => {
       if (this.supabase) {
@@ -88,6 +93,7 @@ class DatabaseService {
               metrics: state.metrics || this.emptyMetrics(),
             };
             this.recomputeMetrics();
+            this.lastLoadedAt = Date.now();
             return;
           }
         } catch (err: any) {
@@ -106,6 +112,7 @@ class DatabaseService {
             metrics: parsed.metrics || this.emptyMetrics(),
           };
           this.recomputeMetrics();
+          this.lastLoadedAt = Date.now();
         }
       } catch (err: any) {
         console.warn('[DB] Failed reading local store file:', err.message);
@@ -114,13 +121,13 @@ class DatabaseService {
 
     try {
       await this.loadPromise;
-    } catch (err) {
+    } finally {
       this.loadPromise = null;
-      throw err;
     }
   }
 
   private async persist(): Promise<void> {
+    this.lastLoadedAt = Date.now();
     if (this.supabase) {
       try {
         const { error } = await this.supabase.from('reviewer_state').upsert(

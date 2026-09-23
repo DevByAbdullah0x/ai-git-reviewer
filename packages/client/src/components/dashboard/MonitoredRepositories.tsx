@@ -19,9 +19,16 @@ export const MonitoredRepositories: React.FC<MonitoredRepositoriesProps> = ({
   const [loading, setLoading] = useState(false);
   const [statusMsg, setStatusMsg] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
+  React.useEffect(() => {
+    if (!selectedRepoId && repositories.length > 0) {
+      setSelectedRepoId(repositories[0].id);
+    }
+  }, [repositories, selectedRepoId]);
+
   const handleRunReview = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!selectedRepoId || !prNumberInput.trim()) return;
+    const effectiveRepoId = selectedRepoId || repositories[0]?.id;
+    if (!effectiveRepoId || !prNumberInput.trim()) return;
 
     const num = parseInt(prNumberInput.trim(), 10);
     if (isNaN(num) || num <= 0) {
@@ -33,7 +40,7 @@ export const MonitoredRepositories: React.FC<MonitoredRepositoriesProps> = ({
     setStatusMsg(null);
 
     try {
-      const res = await api.runRepositoryReview(selectedRepoId, num);
+      const res = await api.runRepositoryReview(effectiveRepoId, num);
       if (res.review) {
         setStatusMsg({ type: 'success', text: `Successfully reviewed PR #${num} for ${res.review.repoOwner}/${res.review.repoName}!` });
         onReviewCompleted(res.review);
