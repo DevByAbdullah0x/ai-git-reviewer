@@ -3,7 +3,11 @@ import { RepositoryConfig, ISSUE_CATEGORIES, ISSUE_SEVERITIES, IssueCategory, Is
 import { api } from '../../services/api';
 import { Save, Check, GitBranch, Terminal, RefreshCw, Github, Plus, ExternalLink, Trash2 } from 'lucide-react';
 
-export const RulesConfig: React.FC = () => {
+interface RulesConfigProps {
+  onRepositoriesChanged?: () => void;
+}
+
+export const RulesConfig: React.FC<RulesConfigProps> = ({ onRepositoriesChanged }) => {
   const [repos, setRepos] = useState<RepositoryConfig[]>([]);
   const [selectedRepo, setSelectedRepo] = useState<RepositoryConfig | null>(null);
   const [saving, setSaving] = useState(false);
@@ -38,6 +42,7 @@ export const RulesConfig: React.FC = () => {
       if (res.repositories.length > 0) {
         setSelectedRepo(res.repositories[0]);
       }
+      onRepositoriesChanged?.();
       if (res.syncedCount > 0) {
         setSyncMessage(`Successfully synced ${res.syncedCount} repositories from GitHub App!`);
       } else {
@@ -63,6 +68,7 @@ export const RulesConfig: React.FC = () => {
       setSelectedRepo(created);
       setNewRepoInput('');
       setSyncMessage(`Added repository ${created.fullName}!`);
+      onRepositoriesChanged?.();
       setTimeout(() => setSyncMessage(null), 4000);
     } catch (err: any) {
       console.error('Failed to add repository', err);
@@ -80,6 +86,7 @@ export const RulesConfig: React.FC = () => {
       setRepos(remaining);
       setSelectedRepo(remaining.length > 0 ? remaining[0] : null);
       setSyncMessage(`Removed repository ${fullName}`);
+      onRepositoriesChanged?.();
       setTimeout(() => setSyncMessage(null), 4000);
     } catch (err: any) {
       console.error('Failed to delete repository', err);
@@ -97,6 +104,7 @@ export const RulesConfig: React.FC = () => {
       const updated = await api.updateRepository(selectedRepo.id, selectedRepo);
       setSelectedRepo(updated);
       setSavedSuccess(true);
+      onRepositoriesChanged?.();
       setTimeout(() => setSavedSuccess(false), 2500);
     } catch (err) {
       console.error('Failed to update repository', err);

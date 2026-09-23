@@ -21,7 +21,7 @@ export const App: React.FC = () => {
 
   useEffect(() => {
     loadData();
-  }, []);
+  }, [activeTab]);
 
   const loadData = async () => {
     try {
@@ -130,7 +130,7 @@ export const App: React.FC = () => {
 
         {activeTab === 'playground' && <DiffPlayground />}
 
-        {activeTab === 'rules' && <RulesConfig />}
+        {activeTab === 'rules' && <RulesConfig onRepositoriesChanged={loadData} />}
       </main>
 
       {/* PR Detail Modal */}
