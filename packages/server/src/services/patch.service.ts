@@ -57,7 +57,7 @@ export async function applyIssueFix(
             branch: review.headRef,
           });
 
-          db.updateIssueStatus(reviewId, issueId, 'FIXED');
+          await db.updateIssueStatus(reviewId, issueId, 'FIXED');
 
           return {
             success: true,
@@ -73,7 +73,7 @@ export async function applyIssueFix(
   }
 
   // Simulated patch application (for playground / demo mode)
-  db.updateIssueStatus(reviewId, issueId, 'FIXED');
+  await db.updateIssueStatus(reviewId, issueId, 'FIXED');
 
   return {
     success: true,
@@ -81,4 +81,3 @@ export async function applyIssueFix(
     message: `Fix applied successfully for "${issue.title}". Marked status as FIXED.`,
   };
 }
-

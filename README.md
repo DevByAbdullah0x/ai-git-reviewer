@@ -1,21 +1,15 @@
-# AI Git Reviewer
 <div align="center">
   <img src="assets/logo.png" alt="AI Git Reviewer Logo" width="460" />
 
-> **An automated GitHub App & Code Intelligence platform that inspects Pull Requests, performs deterministic static security scans, runs structured multi-category AI code reviews, and posts native inline comments with 1-click apply fixes.**
   <h1>AI Git Reviewer</h1>
   <p><strong>automated code review, powered by AI</strong></p>
 
-![Architecture](https://img.shields.io/badge/Architecture-GitHub%20App%20%2B%20Microservices-blue)
-![TypeScript](https://img.shields.io/badge/TypeScript-5.5-3178c6)
-![React](https://img.shields.io/badge/Frontend-React%20%2B%20Vite%20%2B%20Tailwind-61dafb)
-![Node.js](https://img.shields.io/badge/Backend-Node.js%20%2B%20Express-339933)
-![License](https://img.shields.io/badge/License-MIT-green)
   [![Live Demo](https://img.shields.io/badge/Vercel-Live%20Demo-black?style=for-the-badge&logo=vercel)](https://ai-git-reviewer.vercel.app)
   [![GitHub](https://img.shields.io/badge/GitHub-Repository-181717?style=for-the-badge&logo=github)](https://github.com/DevByAbdullah0x/ai-git-reviewer)
   ![TypeScript](https://img.shields.io/badge/TypeScript-5.5-3178c6)
   ![React](https://img.shields.io/badge/Frontend-React%20%2B%20Vite%20%2B%20Tailwind-61dafb)
   ![Node.js](https://img.shields.io/badge/Backend-Node.js%20%2B%20Express-339933)
+  ![Supabase](https://img.shields.io/badge/Database-Supabase%20%2F%20Postgres-3ECF8E?logo=supabase&logoColor=white)
   ![License](https://img.shields.io/badge/License-MIT-green)
 
   <br />
@@ -24,7 +18,6 @@
 
 ---
 
-##  Why this is a Standout Portfolio Project
 ## 🚀 Why this is a Standout Portfolio Project
 
 Most AI coding projects are simple chatbot wrappers (*"paste code $\rightarrow$ AI gives advice"*). **AI Git Reviewer** is built as an actual production-grade developer tool integrated into the GitHub developer lifecycle:
@@ -39,6 +32,7 @@ Most AI coding projects are simple chatbot wrappers (*"paste code $\rightarrow$ 
 - **Native GitHub Inline Suggestions**: Formats suggested fixes into native GitHub ````suggestion` blocks, enabling developers to commit fixes right from the PR review tab.
 - **1-Click Apply Fix Engine**: Builds git patches and commits approved fixes directly onto the PR head branch via the GitHub Git Data API.
 - **PR Health Score (0–100)**: Computes a weighted quality index and generates markdown PR badges.
+- **Durable Cloud Persistence (Supabase)**: Synchronizes repositories, policies, and review history to PostgreSQL/Supabase so settings survive Vercel serverless cold starts.
 - **Modern Web Dashboard & Diff Playground**: Full React analytics dashboard, PR inspector, repository rule manager, and an on-demand Diff Review Sandbox.
 
 ---
@@ -67,7 +61,7 @@ flowchart TD
         Aggregator --> ReviewPoster[GitHub Review API Formatter]
         ReviewPoster -->|Post Line Comments & Badges| InlineComment
         
-        DB[(File / SQLite DB Store)] <--> API[REST API]
+        DB[(Supabase / Local Store)] <--> API[REST API]
     end
 
     subgraph FixEngine ["Patch & Fix Service"]
@@ -98,6 +92,8 @@ ai-git-reviewer/
 │   ├── server/                         # Node.js + TypeScript Express Backend
 │   │   ├── src/
 │   │   │   ├── config/                 # Environment & credentials loader
+│   │   │   ├── db/
+│   │   │   │   └── schema.sql          # Supabase SQL table definition
 │   │   │   ├── analyzer/
 │   │   │   │   ├── diff-parser.ts      # Hunk line mapping for exact PR comments
 │   │   │   │   ├── static/scanner.ts   # Regex / AST deterministic secret scanner
@@ -108,7 +104,7 @@ ai-git-reviewer/
 │   │   │   │   ├── app.ts              # Octokit GitHub App authentication
 │   │   │   │   └── reviewer.ts         # GitHub Review API inline comment formatter
 │   │   │   ├── services/
-│   │   │   │   ├── db.service.ts       # Database store with persistence
+│   │   │   │   ├── db.service.ts       # Supabase & Local Fallback Database Service
 │   │   │   │   ├── patch.service.ts    # 1-Click fix patch applier & commit engine
 │   │   │   │   └── review.service.ts   # Core review orchestrator
 │   │   │   ├── routes/
@@ -167,12 +163,36 @@ npm run dev:client
 
 ---
 
+## 🗄️ Database & Cloud Persistence (Supabase)
+
+To persist repository settings, review logs, and metric statistics across serverless cold starts (Vercel):
+
+1. Create a free project at [Supabase](https://supabase.com).
+2. Open the **SQL Editor** in your Supabase dashboard and run the schema from `packages/server/src/db/schema.sql`:
+   ```sql
+   CREATE TABLE IF NOT EXISTS reviewer_state (
+     id TEXT PRIMARY KEY,
+     data JSONB NOT NULL DEFAULT '{}'::jsonb,
+     updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
+   );
+
+   ALTER TABLE reviewer_state ENABLE ROW LEVEL SECURITY;
+   ```
+3. Copy your project credentials into `packages/server/.env` (and Vercel Project Environment Variables):
+   ```env
+   SUPABASE_URL=https://your-project-id.supabase.co
+   SUPABASE_SERVICE_ROLE_KEY=your_supabase_service_role_key
+   ```
+4. *Graceful Fallback*: If Supabase credentials are not provided, the server automatically falls back to local disk storage (`packages/server/data/store.json`) or in-memory storage without errors.
+
+---
+
 ## 🔧 Configuring as a Live GitHub App
 
 To run automated reviews on real GitHub Pull Requests:
 
 1. Go to **GitHub Settings $\rightarrow$ Developer settings $\rightarrow$ GitHub Apps $\rightarrow$ New GitHub App**.
-2. Set **Webhook URL** to your server endpoint (e.g. via Smee.io or ngrok: `https://your-domain.ngrok-free.app/api/webhooks/github`).
+2. Set **Webhook URL** to your server endpoint (e.g. `https://ai-git-reviewer.vercel.app/api/webhooks/github`).
 3. Set **Webhook Secret** matching `GITHUB_APP_WEBHOOK_SECRET` in `packages/server/.env`.
 4. Grant the following Permissions:
    - **Pull requests**: `Read and write`
@@ -198,4 +218,3 @@ To run automated reviews on real GitHub Pull Requests:
 - **Diff Review Playground**: Paste any code snippet or raw unified diff, choose presets (SQLi, N+1 query, Clean code), and inspect real-time AI findings with 1-click patch buttons.
 - **Public PR Inspector**: Input any public GitHub Pull Request URL (e.g., `facebook/react/pull/1234`) to review external PRs on-demand.
 - **Rule Customization**: Adjust merge-block severity thresholds, toggle analysis categories, and customize project-specific guidelines (e.g., *"Enforce Zod validation on inputs; require strict TypeScript typing"*).
-

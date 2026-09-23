@@ -1,4 +1,4 @@
-import { Router, Request, Response } from 'express';
+import { Router, Request, Response, NextFunction } from 'express';
 import { db } from '../services/db.service';
 import { processPullRequestReview } from '../services/review.service';
 import { applyIssueFix } from '../services/patch.service';
@@ -12,6 +12,16 @@ import { config } from '../config';
 
 export const apiRouter = Router();
 
+// Middleware: ensure Supabase cloud state is loaded for every request
+apiRouter.use(async (_req: Request, _res: Response, next: NextFunction) => {
+  try {
+    await db.ensureLoaded();
+  } catch (err: any) {
+    console.warn('[API] Warning during ensureLoaded():', err.message);
+  }
+  next();
+});
+
 // 1. Health check & Provider Info
 apiRouter.get('/health', (_req: Request, res: Response) => {
   res.json({
@@ -19,6 +29,7 @@ apiRouter.get('/health', (_req: Request, res: Response) => {
     timestamp: new Date().toISOString(),
     aiProvider: config.aiProvider,
     githubAppConfigured: Boolean(config.github.appId && config.github.privateKey),
+    supabaseConfigured: db.isSupabaseConnected(),
   });
 });
 
@@ -40,7 +51,7 @@ apiRouter.post('/repositories/sync', async (_req: Request, res: Response) => {
     const syncedRepos = [];
 
     for (const repo of installed) {
-      const saved = db.upsertRepository({
+      const saved = await db.upsertRepository({
         fullName: repo.fullName,
         owner: repo.owner,
         name: repo.name,
@@ -59,7 +70,7 @@ apiRouter.post('/repositories/sync', async (_req: Request, res: Response) => {
   }
 });
 
-apiRouter.post('/repositories', (req: Request, res: Response): void => {
+apiRouter.post('/repositories', async (req: Request, res: Response): Promise<void> => {
   const { fullName, minimumSeverityToBlock, strictness, enabledCategories, customInstructions } = req.body;
   if (!fullName || typeof fullName !== 'string' || !fullName.includes('/')) {
     res.status(400).json({ error: 'Valid repository fullName is required (e.g. owner/repo)' });
@@ -67,7 +78,7 @@ apiRouter.post('/repositories', (req: Request, res: Response): void => {
   }
 
   const parts = fullName.trim().split('/');
-  const created = db.upsertRepository({
+  const created = await db.upsertRepository({
     fullName: fullName.trim(),
     owner: parts[0],
     name: parts[1],
@@ -89,7 +100,7 @@ apiRouter.get('/repositories/:id', (req: Request, res: Response): void => {
   res.json(repo);
 });
 
-apiRouter.put('/repositories/:id', (req: Request, res: Response): void => {
+apiRouter.put('/repositories/:id', async (req: Request, res: Response): Promise<void> => {
   const parsed = RepositoryConfigUpdateSchema.safeParse(req.body);
   if (!parsed.success) {
     res.status(400).json({ error: parsed.error.format() });
@@ -99,7 +110,7 @@ apiRouter.put('/repositories/:id', (req: Request, res: Response): void => {
   const existingRepo = db.getRepository(req.params.id);
   const fullName = existingRepo?.fullName || req.body.fullName || req.params.id;
 
-  const updated = db.upsertRepository({
+  const updated = await db.upsertRepository({
     ...(existingRepo || {
       id: req.params.id,
       fullName,
@@ -112,8 +123,8 @@ apiRouter.put('/repositories/:id', (req: Request, res: Response): void => {
   res.json(updated);
 });
 
-apiRouter.delete('/repositories/:id', (req: Request, res: Response): void => {
-  const deleted = db.deleteRepository(req.params.id);
+apiRouter.delete('/repositories/:id', async (req: Request, res: Response): Promise<void> => {
+  const deleted = await db.deleteRepository(req.params.id);
   if (!deleted) {
     res.status(404).json({ error: 'Repository not found' });
     return;
@@ -136,13 +147,13 @@ apiRouter.get('/reviews', (req: Request, res: Response) => {
   res.json(reviews);
 });
 
-apiRouter.delete('/reviews', (_req: Request, res: Response) => {
-  db.clearReviews();
+apiRouter.delete('/reviews', async (_req: Request, res: Response) => {
+  await db.clearReviews();
   res.json({ success: true, message: 'All reviews cleared', metrics: db.getMetrics() });
 });
 
-apiRouter.delete('/reviews/:id', (req: Request, res: Response): void => {
-  const deleted = db.deleteReview(req.params.id);
+apiRouter.delete('/reviews/:id', async (req: Request, res: Response): Promise<void> => {
+  const deleted = await db.deleteReview(req.params.id);
   if (!deleted) {
     res.status(404).json({ error: 'Review not found' });
     return;
@@ -246,9 +257,9 @@ apiRouter.post('/reviews/:id/issues/:issueId/fix', async (req: Request, res: Res
 });
 
 // 8. Dismiss Issue
-apiRouter.post('/reviews/:id/issues/:issueId/dismiss', (req: Request, res: Response): void => {
+apiRouter.post('/reviews/:id/issues/:issueId/dismiss', async (req: Request, res: Response): Promise<void> => {
   const { id, issueId } = req.params;
-  const success = db.updateIssueStatus(id, issueId, 'DISMISSED');
+  const success = await db.updateIssueStatus(id, issueId, 'DISMISSED');
 
   if (!success) {
     res.status(404).json({ error: 'Review or issue not found' });
@@ -313,4 +324,3 @@ apiRouter.post('/repositories/:id/reviews/run', async (req: Request, res: Respon
     });
   }
 });
-

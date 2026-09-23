@@ -14,6 +14,7 @@
     "@octokit/app": "^15.1.1",
     "@octokit/rest": "^20.1.1",
     "@octokit/webhooks": "^13.2.7",
+    "@supabase/supabase-js": "^2.117.1",
     "axios": "^1.7.4",
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
@@ -33,4 +34,3 @@
     "typescript": "^5.5.4"
   }
 }
-

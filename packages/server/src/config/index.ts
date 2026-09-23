@@ -22,5 +22,10 @@ export const config = {
     clientId: process.env.GITHUB_APP_CLIENT_ID || '',
     clientSecret: process.env.GITHUB_APP_CLIENT_SECRET || '',
   },
-};
 
+  // Supabase Persistence config
+  supabase: {
+    url: process.env.SUPABASE_URL || '',
+    serviceRoleKey: process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_KEY || process.env.SUPABASE_ANON_KEY || '',
+  },
+};

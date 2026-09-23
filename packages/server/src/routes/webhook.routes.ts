@@ -50,14 +50,16 @@ webhookRouter.post('/github', async (req: Request, res: Response): Promise<void>
 
       console.info(`[Webhook] Processing PR #${pr.number} for ${repo.full_name} (${action})`);
 
-      // Ensure repository is registered in DB
-      db.upsertRepository({
-        fullName: repo.full_name,
-        owner: repo.owner.login,
-        name: repo.name,
-      });
-
       try {
+        await db.ensureLoaded();
+
+        // Ensure repository is registered in DB
+        await db.upsertRepository({
+          fullName: repo.full_name,
+          owner: repo.owner.login,
+          name: repo.name,
+        });
+
         let diffText = '';
 
         if (installation?.id) {
@@ -92,4 +94,3 @@ webhookRouter.post('/github', async (req: Request, res: Response): Promise<void>
     }
   }
 });
-

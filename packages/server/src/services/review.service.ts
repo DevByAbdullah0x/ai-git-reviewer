@@ -118,8 +118,7 @@ export async function processPullRequestReview(params: ProcessReviewParams): Pro
   }
 
   // 7. Save to DB Store
-  db.saveReview(review);
+  await db.saveReview(review);
 
   return review;
 }
-
